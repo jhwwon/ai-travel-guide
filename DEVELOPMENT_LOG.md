@@ -50,7 +50,7 @@ requests
 - FastAPI 서버 구현 (`app/main.py`)
 - LangChain + Groq LLM 연동 (`app/chain.py`)
 - Chroma 벡터DB 구성 (`app/vector_store.py`)
-- Wikipedia API로 국내 91개 + 해외 210개 = 301개 여행지 데이터 수집 (`app/data_loader.py`)
+- Wikipedia API로 국내 103개 + 해외 203개 = 306개 여행지 데이터 수집 (`app/data_loader.py`)
 - SSE 스트리밍 응답 구현
 - 실시간 날씨 API 연동 (OpenWeatherMap)
 
@@ -586,6 +586,6 @@ touch frontend/public/.nojekyll
 | 컨테이너 | Docker + Docker Compose |
 | CI/CD | Jenkins (Docker 컨테이너) |
 | 오케스트레이션 | Kubernetes (Minikube) |
-| 데이터 | Wikipedia API (301개 여행지) |
+| 데이터 | Wikipedia API (306개 여행지) |
 | 날씨 | OpenWeatherMap API |
 | 지도 | OpenStreetMap + Leaflet |

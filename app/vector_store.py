@@ -13,7 +13,7 @@ CHROMA_PATH = str(Path(__file__).parent / "data" / "chroma_db")
 
 def get_embeddings():
     return HuggingFaceEmbeddings(
-        model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
     )
 
 def build_vectorstore():
