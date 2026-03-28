@@ -10,8 +10,8 @@ __pycache__/
 .venv/
 venv/
 
-# 벡터DB 데이터 (용량 큼)
-app/data/chroma_db/
+# 벡터DB 데이터 - Render 배포를 위해 포함 (2.6MB)
+# app/data/chroma_db/
 
 # Node.js
 frontend/node_modules/
