@@ -7,7 +7,13 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from pathlib import Path
-from app.chain import get_travel_response, stream_travel_response
+def get_travel_response(message, session_id):
+    from app.chain import get_travel_response as _fn
+    return _fn(message, session_id)
+
+def stream_travel_response(message, session_id):
+    from app.chain import stream_travel_response as _fn
+    yield from _fn(message, session_id)
 
 load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env")
 
