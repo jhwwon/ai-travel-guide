@@ -38,7 +38,14 @@ async def chat_stream(request: ChatRequest):
             yield f"data: {json.dumps(chunk)}\n\n"
         yield "data: \"[DONE]\"\n\n"
 
-    return StreamingResponse(generate(), media_type="text/event-stream")
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        }
+    )
 
 @app.get("/weather/{city}")
 async def get_weather(city: str):
