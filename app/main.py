@@ -13,6 +13,13 @@ load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env")
 
 app = FastAPI()
 
+@app.on_event("startup")
+async def startup_event():
+    from app.chain import get_retriever
+    print("서버 시작: VectorStore 초기화 중...")
+    get_retriever()
+    print("VectorStore 초기화 완료.")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

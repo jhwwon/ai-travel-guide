@@ -9,7 +9,7 @@ from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from app.data_loader import load_all_travel_data
 
-CHROMA_PATH = "./app/data/chroma_db"
+CHROMA_PATH = str(Path(__file__).parent / "data" / "chroma_db")
 
 def get_embeddings():
     return HuggingFaceEmbeddings(
