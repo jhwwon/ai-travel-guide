@@ -465,6 +465,116 @@ minikube delete
 
 ---
 
+## 7단계: 클라우드 배포 (Render + GitHub Pages)
+
+### 주요 작업
+- GitHub 저장소 생성 및 코드 업로드
+- Render.com에 백엔드 배포 (무료 티어, Python/FastAPI)
+- GitHub Pages에 프론트엔드 배포 (gh-pages 브랜치)
+- 환경변수 설정 (Render 대시보드)
+- frontend 서브모듈 문제 해결
+
+### GitHub 코드 업로드
+```bash
+cd c:/ai-travel-guide
+git init
+git remote add origin https://github.com/<user>/ai-travel-guide.git
+git add .
+git commit -m "initial commit"
+git push -u origin main
+```
+
+### Render 백엔드 배포
+1. [render.com](https://render.com) → New Web Service → GitHub 저장소 연결
+2. 설정:
+   - **Runtime**: Python
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+3. Environment Variables 추가: `GROQ_API_KEY`, `OPENWEATHER_API_KEY`
+4. Deploy 클릭 → 배포 완료 후 URL 확인 (예: `https://ai-travel-backend-xxxx.onrender.com`)
+
+`render.yaml` 파일로 자동 설정:
+```yaml
+services:
+  - type: web
+    name: ai-travel-backend
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENWEATHER_API_KEY
+        sync: false
+```
+
+### GitHub Pages 프론트엔드 배포
+```bash
+# frontend/package.json에 설정 추가
+"homepage": "https://<user>.github.io/<repo>",
+"scripts": {
+  "predeploy": "npm run build",
+  "deploy": "gh-pages -d build --dotfiles"
+},
+"devDependencies": {
+  "gh-pages": "^6.3.0"
+}
+
+# 배포
+cd frontend
+npm run deploy -- --repo https://github.com/<user>/<repo>.git
+```
+
+GitHub 저장소 Settings → Pages → Source: `gh-pages` 브랜치, `/ (root)` 설정
+
+### 배포 URLs
+| 서비스 | URL |
+|--------|-----|
+| 프론트엔드 | `https://jhwwon.github.io/ai-travel-guide` |
+| 백엔드 API | `https://ai-travel-backend-75oy.onrender.com` |
+
+### 트러블슈팅
+
+#### frontend 서브모듈 문제
+- **문제**: `No url found for submodule path 'frontend' in .gitmodules` — GitHub Actions 배포 실패
+- **원인**: `frontend/.git` 존재로 인해 Git이 서브모듈로 인식
+- **해결**:
+```bash
+git rm --cached frontend -r
+git add frontend/
+git commit -m "fix: frontend 서브모듈 문제 해결"
+git push
+```
+
+#### gh-pages 패키지 캐시 오염
+- **문제**: 배포 후 gh-pages 브랜치에 불필요한 파일(`.claude`, `frontend/` 등) 포함
+- **원인**: `node_modules/.cache/gh-pages/`에 오염된 캐시 잔존
+- **해결**: 캐시 삭제 + 브랜치 삭제 후 git orphan 방식으로 직접 배포
+```bash
+rm -rf node_modules/.cache/gh-pages/
+git push origin --delete gh-pages
+
+# build/ 폴더에서 직접 orphan 브랜치 생성
+cd frontend/build
+git init temp_deploy && cd temp_deploy
+git checkout --orphan gh-pages
+cp -r ../* . && cp ../.nojekyll .
+git add -A
+git commit -m "Deploy to GitHub Pages"
+git remote add origin https://github.com/<user>/<repo>.git
+git push origin gh-pages
+cd ../.. && rm -rf build/temp_deploy
+```
+
+#### Jekyll .nojekyll 누락
+- **문제**: GitHub Pages가 Jekyll로 처리하면서 파일 누락 가능성
+- **해결**: `frontend/public/.nojekyll` 파일 생성 (CRA 빌드 시 자동 복사)
+```bash
+touch frontend/public/.nojekyll
+```
+
+---
+
 ## 전체 기술 스택 요약
 
 | 영역 | 기술 |

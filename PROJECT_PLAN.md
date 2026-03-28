@@ -255,7 +255,8 @@ data: "[DONE]"
 | 3단계 | React 프론트엔드 개발 | ✅ 완료 |
 | 4단계 | Docker 컨테이너화 | ✅ 완료 |
 | 5단계 | Jenkins CI/CD 구성 | ✅ 완료 |
-| 6단계 | Kubernetes (Minikube) 배포 | ⬜ 예정 |
+| 6단계 | Kubernetes (Minikube) 배포 | ✅ 완료 |
+| 7단계 | 클라우드 배포 (Render + GitHub Pages) | ✅ 완료 |
 
 ### 3단계 세부 구현 내용
 - 다크 글래스모피즘 UI 디자인
@@ -436,7 +437,68 @@ sh """
 
 ---
 
-## 10. 로컬 실행 방법
+### 16. GitHub Pages 배포 실패 — frontend 서브모듈 문제
+
+#### 16-1. frontend가 서브모듈로 인식되는 문제
+- **문제**: GitHub Actions에서 `No url found for submodule path 'frontend' in .gitmodules` 오류로 Pages 배포 실패
+- **원인**: `frontend/` 폴더 안에 `.git` 디렉토리가 존재했기 때문에 Git이 `frontend`를 독립 저장소(서브모듈)로 인식. Git 인덱스에 mode `160000`(gitlink)으로 등록되어 파일 내용 대신 커밋 해시만 가리킴
+- **해결**: Git 인덱스에서 제거 후 일반 파일로 재등록
+
+```bash
+git rm --cached frontend -r   # 서브모듈로 등록된 항목 제거
+git add frontend/             # 일반 파일로 다시 추가
+git commit -m "fix: frontend 서브모듈 문제 해결"
+git push
+```
+
+#### 16-2. gh-pages 패키지 캐시 오염 문제
+- **문제**: 서브모듈 문제 해결 후에도 `gh-pages` 브랜치에 `.claude`, `.dockerignore`, `frontend/` 등 불필요한 파일이 계속 포함됨
+- **원인**: `gh-pages` npm 패키지가 `node_modules/.cache/gh-pages/` 에 클론을 캐시하는데, 이전에 오염된 저장소 상태가 캐시에 남아 재사용됨
+- **해결**: 캐시 삭제 + `gh-pages` 브랜치 삭제 후 직접 git orphan 브랜치로 배포
+
+```bash
+# gh-pages 패키지 캐시 삭제
+rm -rf node_modules/.cache/gh-pages/
+
+# remote gh-pages 브랜치 삭제
+git push origin --delete gh-pages
+
+# build/ 폴더에서 직접 orphan 브랜치 생성 후 푸시
+cd frontend/build
+git init temp_deploy
+cd temp_deploy
+git checkout --orphan gh-pages
+cp -r ../* .
+cp ../.nojekyll .
+git add -A
+git commit -m "Deploy to GitHub Pages"
+git remote add origin https://github.com/<user>/<repo>.git
+git push origin gh-pages
+```
+
+#### 16-3. Jekyll이 static 파일을 처리하지 못하는 문제
+- **문제**: GitHub Pages가 Jekyll로 사이트를 빌드하면서 `_` 로 시작하는 경로나 dotfile을 무시할 수 있음
+- **해결**: `public/` 폴더에 빈 `.nojekyll` 파일 추가 (CRA 빌드 시 자동으로 `build/`에 복사됨)
+
+```bash
+touch frontend/public/.nojekyll
+```
+
+---
+
+## 10. 배포 URLs
+
+| 서비스 | URL |
+|--------|-----|
+| 프론트엔드 (GitHub Pages) | https://jhwwon.github.io/ai-travel-guide |
+| 백엔드 API (Render) | https://ai-travel-backend-75oy.onrender.com |
+| 백엔드 API 문서 | https://ai-travel-backend-75oy.onrender.com/docs |
+
+> ⚠️ Render 무료 티어는 15분 이상 미사용 시 슬립 모드로 전환됩니다. 첫 요청 시 30~60초 정도 대기가 발생할 수 있습니다.
+
+---
+
+## 11. 로컬 실행 방법
 
 ```bash
 # 가상환경 활성화
