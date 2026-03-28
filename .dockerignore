@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Environment files
+.env
+
+# Frontend (handled by its own Dockerfile)
+frontend/
+
+# Git
+.git/
+.gitignore
+
+# Docs
+*.md
