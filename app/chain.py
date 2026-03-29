@@ -45,6 +45,14 @@ prompt = ChatPromptTemplate.from_messages([
 2. 날씨 관련 질문(현재 날씨, 기온, 강수량 등)은 답변하지 마세요. "날씨 정보는 화면에 실시간으로 표시됩니다." 라고만 안내하세요.
 3. 답변은 반드시 마크다운 형식으로 작성하여 가독성을 높이세요.
    - 항목이 여러 개일 때는 bullet list(- 항목)를 사용하세요. 리스트 항목 안에 *, •, ▶ 등 기호를 추가로 쓰지 마세요.
+4. 사용자가 "일정표", "일정 짜줘", "여행 계획" 등을 요청하면 반드시 아래 형식으로만 답변하세요:
+   1일차
+   - 활동1
+   - 활동2
+   2일차
+   - 활동1
+   - 활동2
+   (### 소제목, 다른 텍스트 없이 오직 위 형식만 사용)
    - 중요한 이름이나 키워드는 **굵게** 표시하세요.
    - 카테고리가 나뉠 때는 ### 소제목을 사용하세요.
    - 한 문단에 모든 내용을 넣지 말고 내용별로 단락을 나눠서 작성하세요.
@@ -74,8 +82,29 @@ def get_chat_history(session_id: str):
 
 def filter_non_korean(text: str) -> str:
     """한국어·숫자·기본 ASCII(마크다운 기호 포함) 외 문자를 제거합니다."""
-    # 허용: 한글(AC00-D7A3, 1100-11FF, 3130-318F), ASCII(0x00-0x7F), 공백
-    return re.sub(r'[^\uAC00-\uD7A3\u1100-\u11FF\u3130-\u318F\x00-\x7F]', '', text)
+    filtered = re.sub(r'[^\uAC00-\uD7A3\u1100-\u11FF\u3130-\u318F\x00-\x7F]', '', text)
+    # 내용 없는 빈 bold 마크다운 제거 (예: ****, ** **)
+    filtered = re.sub(r'\*\*\s*\*\*', '', filtered)
+    return filtered
+
+ITINERARY_KEYWORDS = ["일정표", "일정 짜", "일정짜", "여행 계획", "여행계획", "며칠 일정", "박 일정"]
+
+ITINERARY_INSTRUCTION = """
+반드시 아래 형식으로만 답변하세요. 다른 텍스트, 소제목, 설명 없이 오직 이 형식만 사용하세요:
+
+1일차
+- 활동 또는 장소
+- 활동 또는 장소
+
+2일차
+- 활동 또는 장소
+- 활동 또는 장소
+
+(일수에 맞게 계속)
+"""
+
+def is_itinerary_request(message: str) -> bool:
+    return any(kw in message for kw in ITINERARY_KEYWORDS)
 
 def get_travel_response(message: str, session_id: str) -> str:
     chat_history = get_chat_history(session_id)
@@ -87,11 +116,13 @@ def get_travel_response(message: str, session_id: str) -> str:
     if not context:
         context = "관련 정보를 찾지 못했습니다. 일반 지식으로 답변합니다."
 
+    question = message + (ITINERARY_INSTRUCTION if is_itinerary_request(message) else "")
+
     chain = prompt | get_llm() | StrOutputParser()
     response = chain.invoke({
         "context": context,
         "chat_history": chat_history,
-        "question": message
+        "question": question
     })
 
     response = filter_non_korean(response)
@@ -111,13 +142,15 @@ def stream_travel_response(message: str, session_id: str):
     if not context:
         context = "관련 정보를 찾지 못했습니다. 일반 지식으로 답변합니다."
 
+    question = message + (ITINERARY_INSTRUCTION if is_itinerary_request(message) else "")
+
     chain = prompt | get_llm() | StrOutputParser()
     full_response = ""
 
     for chunk in chain.stream({
         "context": context,
         "chat_history": chat_history,
-        "question": message
+        "question": question
     }):
         filtered_chunk = filter_non_korean(chunk)
         full_response += filtered_chunk
