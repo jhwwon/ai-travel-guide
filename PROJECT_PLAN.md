@@ -75,7 +75,6 @@
 ### 3.2 데이터 수집
 | 기술 | 용도 |
 |------|------|
-| 위키피디아 API | 국내 + 해외 여행지 데이터 (306개) |
 | 위키피디아 API | 국내 + 해외 여행지 데이터 수집 (306개) |
 
 ### 3.3 백엔드
@@ -99,7 +98,6 @@
 | react-markdown + remark-gfm | 최신 | AI 답변 마크다운 렌더링 |
 | react-leaflet + Leaflet | 최신 | 인터랙티브 지도 (OpenStreetMap) |
 | jspdf + html2canvas | 최신 | 여행 일정표 PDF 다운로드 |
-> ⚠️ Unsplash source.unsplash.com 은 2023년 서비스 종료로 이미지 기능 미제공
 
 ### 3.5 인프라 / DevOps
 | 기술 | 용도 |
@@ -129,7 +127,6 @@
 [응답 스트리밍 반환]
     ↓ 병렬 처리
 [OpenWeatherMap API] ← 실시간 날씨
-[Unsplash]           ← 여행지 이미지
 [OpenStreetMap]      ← 지도 렌더링
 ```
 

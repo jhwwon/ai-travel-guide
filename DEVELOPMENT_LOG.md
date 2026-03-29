@@ -663,7 +663,7 @@ npm run build && npm run deploy
     ↓ nginx 리버스 프록시
 [localhost:8000]
     ↓
-[FastAPI + uvicorn (nohup 백그라운드)]
+[FastAPI + uvicorn (systemd 서비스 — 자동 시작/장애 복구)]
     ↓
 [Chroma VectorDB + Groq LLM API]
 ```
