@@ -73,8 +73,9 @@ def get_chat_history(session_id: str):
     return chat_histories[session_id]
 
 def filter_non_korean(text: str) -> str:
-    """일본어(히라가나·가타카나)·한자 등 비한국어 문자를 제거합니다."""
-    return re.sub(r'[\u3040-\u30FF\u4E00-\u9FFF\u3400-\u4DBF]', '', text)
+    """한국어·숫자·기본 ASCII(마크다운 기호 포함) 외 문자를 제거합니다."""
+    # 허용: 한글(AC00-D7A3, 1100-11FF, 3130-318F), ASCII(0x00-0x7F), 공백
+    return re.sub(r'[^\uAC00-\uD7A3\u1100-\u11FF\u3130-\u318F\x00-\x7F]', '', text)
 
 def get_travel_response(message: str, session_id: str) -> str:
     chat_history = get_chat_history(session_id)
