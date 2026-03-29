@@ -118,8 +118,9 @@ def stream_travel_response(message: str, session_id: str):
         "chat_history": chat_history,
         "question": message
     }):
-        full_response += chunk
-        yield chunk
+        filtered_chunk = filter_non_korean(chunk)
+        full_response += filtered_chunk
+        yield filtered_chunk
 
     full_response = filter_non_korean(full_response)
     chat_history.append(HumanMessage(content=message))
