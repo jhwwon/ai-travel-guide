@@ -172,22 +172,39 @@ ai-travel-guide/
 ├── frontend/                       # React 프론트엔드
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── ChatBox.tsx         # 메인 채팅 UI (스트리밍, 날씨, 지도, 이미지, 일정표)
+│   │   │   ├── ChatBox.tsx         # 메인 채팅 UI (스트리밍, 날씨, 지도, 일정표)
 │   │   │   └── TravelMap.tsx       # Leaflet 지도 컴포넌트
 │   │   ├── App.tsx
-│   │   └── index.css               # Tailwind CSS
+│   │   ├── index.tsx
+│   │   ├── index.css               # Tailwind CSS
+│   │   └── react-app-env.d.ts
+│   ├── public/
+│   │   ├── index.html
+│   │   └── robots.txt
+│   ├── build/                      # 프로덕션 빌드 결과물 (GitHub Pages 배포)
 │   ├── Dockerfile
+│   ├── nginx.conf                  # nginx SSE 프록시 설정 (Docker용)
+│   ├── tailwind.config.js
+│   ├── postcss.config.js
+│   ├── tsconfig.json
 │   └── package.json
-├── k8s/                            # Kubernetes 설정
-│   ├── backend-deployment.yaml
-│   ├── frontend-deployment.yaml
-│   └── service.yaml
+├── jenkins/                        # Jenkins CI/CD 설정
+│   ├── Dockerfile                  # Jenkins 커스텀 이미지 (docker.io + docker-compose 포함)
+│   └── entrypoint.sh
+├── k8s/                            # Kubernetes 매니페스트
+│   ├── backend-deployment.yaml     # 백엔드 Deployment + ClusterIP Service
+│   ├── frontend-deployment.yaml    # 프론트엔드 Deployment + NodePort Service
+│   └── secret.yaml.example         # Secret 생성 예시
+├── Dockerfile                      # 백엔드 Docker 이미지
 ├── Jenkinsfile                     # Jenkins CI/CD 파이프라인
-├── Dockerfile                      # 백엔드 Dockerfile
-├── docker-compose.yml              # 로컬 개발 환경
-├── .env                            # 환경변수
+├── docker-compose.yml              # 로컬 멀티 컨테이너 구성
+├── render.yaml                     # Render 배포 설정 (현재 미사용)
 ├── requirements.txt                # Python 패키지 목록
-└── PROJECT_PLAN.md                 # 프로젝트 기획서
+├── .env                            # 환경변수 (gitignore)
+├── README.md                       # 프로젝트 소개
+├── PROJECT_PLAN.md                 # 프로젝트 기획서
+├── DEVELOPMENT_LOG.md              # 개발 과정 기록
+└── API_TEST.md                     # API 테스트 가이드
 ```
 
 ---
@@ -256,7 +273,8 @@ data: "[DONE]"
 | 4단계 | Docker 컨테이너화 | ✅ 완료 |
 | 5단계 | Jenkins CI/CD 구성 | ✅ 완료 |
 | 6단계 | Kubernetes (Minikube) 배포 | ✅ 완료 |
-| 7단계 | 클라우드 배포 (Render + GitHub Pages) | ✅ 완료 |
+| 7단계 | 클라우드 배포 (Render → AWS EC2 + GitHub Pages) | ✅ 완료 |
+| 8단계 | HTTPS 설정 (DuckDNS + nginx + Let's Encrypt) | ✅ 완료 |
 
 ### 3단계 세부 구현 내용
 - 다크 글래스모피즘 UI 디자인
@@ -491,10 +509,11 @@ touch frontend/public/.nojekyll
 | 서비스 | URL |
 |--------|-----|
 | 프론트엔드 (GitHub Pages) | https://jhwwon.github.io/ai-travel-guide |
-| 백엔드 API (Render) | https://ai-travel-backend-75oy.onrender.com |
-| 백엔드 API 문서 | https://ai-travel-backend-75oy.onrender.com/docs |
+| 백엔드 API (AWS EC2 + HTTPS) | https://jhwwon-travel.duckdns.org |
+| 백엔드 API 문서 | https://jhwwon-travel.duckdns.org/docs |
 
-> ⚠️ Render 무료 티어는 15분 이상 미사용 시 슬립 모드로 전환됩니다. 첫 요청 시 30~60초 정도 대기가 발생할 수 있습니다.
+> EC2 인스턴스: t3.micro (AWS 프리 티어), Amazon Linux 2023, us-east-1
+> nginx 리버스 프록시 → uvicorn (포트 8000), Let's Encrypt SSL 인증서 적용
 
 ---
 

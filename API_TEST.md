@@ -1,6 +1,9 @@
 # AI Travel Guide API 테스트 가이드
 
-API 문서 주소: `http://127.0.0.1:8000/docs`
+| 환경 | API 문서 주소 |
+|------|-------------|
+| 로컬 | `http://127.0.0.1:8000  # 또는 https://jhwwon-travel.duckdns.org (프로덕션)/docs` |
+| 프로덕션 | `https://jhwwon-travel.duckdns.org/docs` |
 
 ---
 
@@ -27,7 +30,7 @@ API 문서 주소: `http://127.0.0.1:8000/docs`
 
 ### curl로 테스트
 ```bash
-curl -X POST "http://127.0.0.1:8000/chat" \
+curl -X POST "http://127.0.0.1:8000  # 또는 https://jhwwon-travel.duckdns.org (프로덕션)/chat" \
   -H "Content-Type: application/json" \
   -d "{\"message\": \"도쿄 여행 추천해줘\", \"session_id\": \"test_001\"}"
 ```
@@ -59,7 +62,7 @@ curl -X POST "http://127.0.0.1:8000/chat" \
 
 ### curl로 테스트 (한글 정상 출력 확인 권장)
 ```bash
-curl -X POST "http://127.0.0.1:8000/chat/stream" \
+curl -X POST "http://127.0.0.1:8000  # 또는 https://jhwwon-travel.duckdns.org (프로덕션)/chat/stream" \
   -H "Content-Type: application/json" \
   -d "{\"message\": \"제주도 여행 추천해줘\", \"session_id\": \"test_001\"}" \
   --no-buffer
@@ -107,7 +110,7 @@ data: "[DONE]"
 
 ### curl로 테스트
 ```bash
-curl "http://127.0.0.1:8000/weather/Tokyo"
+curl "http://127.0.0.1:8000  # 또는 https://jhwwon-travel.duckdns.org (프로덕션)/weather/Tokyo"
 ```
 
 ### 오류 응답 (API 키 미설정 시)
@@ -135,7 +138,7 @@ curl "http://127.0.0.1:8000/weather/Tokyo"
 
 ### curl로 테스트
 ```bash
-curl "http://127.0.0.1:8000/health"
+curl "http://127.0.0.1:8000  # 또는 https://jhwwon-travel.duckdns.org (프로덕션)/health"
 ```
 
 ---
@@ -147,12 +150,12 @@ curl "http://127.0.0.1:8000/health"
 ### curl 순서대로 실행
 ```bash
 # 1번 질문
-curl -X POST "http://127.0.0.1:8000/chat" \
+curl -X POST "http://127.0.0.1:8000  # 또는 https://jhwwon-travel.duckdns.org (프로덕션)/chat" \
   -H "Content-Type: application/json" \
   -d "{\"message\": \"도쿄 여행 추천해줘\", \"session_id\": \"session_abc\"}"
 
 # 2번 질문 (같은 session_id — "거기"가 도쿄를 가리켜야 함)
-curl -X POST "http://127.0.0.1:8000/chat" \
+curl -X POST "http://127.0.0.1:8000  # 또는 https://jhwwon-travel.duckdns.org (프로덕션)/chat" \
   -H "Content-Type: application/json" \
   -d "{\"message\": \"거기 맛집도 알려줘\", \"session_id\": \"session_abc\"}"
 ```

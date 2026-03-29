@@ -53,10 +53,20 @@ prompt = ChatPromptTemplate.from_messages([
 ])
 
 chat_histories = {}
+MAX_HISTORY_MESSAGES = 20  # 최대 10턴 (human + AI 각 1쌍)
+MAX_SESSIONS = 100  # 최대 세션 수
 
 def get_chat_history(session_id: str):
     if session_id not in chat_histories:
+        # 세션 수가 초과되면 가장 오래된 세션 삭제
+        if len(chat_histories) >= MAX_SESSIONS:
+            oldest = next(iter(chat_histories))
+            del chat_histories[oldest]
         chat_histories[session_id] = []
+    history = chat_histories[session_id]
+    # 최대 메시지 수 초과 시 앞에서부터 삭제 (오래된 대화 제거)
+    if len(history) > MAX_HISTORY_MESSAGES:
+        chat_histories[session_id] = history[-MAX_HISTORY_MESSAGES:]
     return chat_histories[session_id]
 
 def get_travel_response(message: str, session_id: str) -> str:

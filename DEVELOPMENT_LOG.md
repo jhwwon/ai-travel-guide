@@ -575,6 +575,101 @@ touch frontend/public/.nojekyll
 
 ---
 
+## 8단계: HTTPS 설정 (DuckDNS + nginx + Let's Encrypt)
+
+### 배경
+- GitHub Pages는 HTTPS, EC2 백엔드는 HTTP → 브라우저가 Mixed Content로 차단
+- 콘솔 에러: `Mixed Content: ... http://44.200.35.13:8000/chat/stream ... blocked`
+
+### 주요 작업
+- DuckDNS 무료 도메인 발급 (`jhwwon-travel.duckdns.org` → `44.200.35.13`)
+- EC2 보안 그룹에 포트 80(HTTP), 443(HTTPS) 인바운드 규칙 추가
+- EC2에 nginx 설치 및 리버스 프록시 설정
+- certbot(Let's Encrypt)으로 SSL 인증서 발급 및 적용
+- 프론트엔드 API URL 변경: `http://44.200.35.13:8000` → `https://jhwwon-travel.duckdns.org`
+
+### 실행 명령어 (EC2 SSH)
+```bash
+# nginx 설치 및 시작
+sudo dnf install nginx -y
+sudo systemctl enable nginx && sudo systemctl start nginx
+
+# certbot 설치
+sudo dnf install -y python3 augeas-libs
+sudo python3 -m venv /opt/certbot/
+sudo /opt/certbot/bin/pip install --upgrade pip
+sudo /opt/certbot/bin/pip install certbot certbot-nginx
+sudo ln -s /opt/certbot/bin/certbot /usr/bin/certbot
+
+# nginx 설정 파일 생성
+sudo nano /etc/nginx/conf.d/travel.conf
+```
+
+nginx 설정 내용:
+```nginx
+server {
+    listen 80;
+    server_name jhwwon-travel.duckdns.org;
+
+    location / {
+        proxy_pass http://localhost:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
+
+```bash
+# nginx 설정 테스트 및 재시작
+sudo nginx -t
+sudo systemctl reload nginx
+
+# SSL 인증서 발급 (도메인 검증 → 자동 nginx 설정 업데이트)
+sudo certbot --nginx -d jhwwon-travel.duckdns.org
+
+# 인증서 nginx에 수동 설치 (자동 설치 실패 시)
+sudo certbot install --cert-name jhwwon-travel.duckdns.org --nginx
+```
+
+### 프론트엔드 업데이트
+```bash
+# frontend/.env.production 수정
+REACT_APP_API_URL=https://jhwwon-travel.duckdns.org
+
+# 재빌드 및 배포
+cd frontend
+npm run build && npm run deploy
+```
+
+### 트러블슈팅
+
+#### certbot 자동 nginx 설치 실패
+- **문제**: `Could not automatically find a matching server block for jhwwon-travel.duckdns.org`
+- **원인**: certbot 실행 시점에 nginx server_name 설정이 없었음
+- **해결**: nginx conf 파일 생성 후 `certbot install --cert-name ... --nginx`로 수동 설치
+
+#### EC2 보안 그룹 규칙 중복
+- **문제**: 포트 80, 443 규칙 추가 시 `already exists` 에러
+- **원인**: 이전에 이미 해당 규칙이 존재
+- **해결**: 문제없음 (이미 열려있으므로 무시)
+
+### 최종 아키텍처
+```
+[사용자]
+    ↓ HTTPS
+[GitHub Pages] → React 프론트엔드
+    ↓ HTTPS (SSE 스트리밍)
+[jhwwon-travel.duckdns.org:443]
+    ↓ nginx 리버스 프록시
+[localhost:8000]
+    ↓
+[FastAPI + uvicorn (nohup 백그라운드)]
+    ↓
+[Chroma VectorDB + Groq LLM API]
+```
+
+---
+
 ## 전체 기술 스택 요약
 
 | 영역 | 기술 |
@@ -586,6 +681,9 @@ touch frontend/public/.nojekyll
 | 컨테이너 | Docker + Docker Compose |
 | CI/CD | Jenkins (Docker 컨테이너) |
 | 오케스트레이션 | Kubernetes (Minikube) |
+| 클라우드 | AWS EC2 t3.micro (Amazon Linux 2023) |
+| 웹서버 | nginx (리버스 프록시 + SSL) |
+| SSL | Let's Encrypt (certbot) + DuckDNS 무료 도메인 |
 | 데이터 | Wikipedia API (306개 여행지) |
 | 날씨 | OpenWeatherMap API |
 | 지도 | OpenStreetMap + Leaflet |

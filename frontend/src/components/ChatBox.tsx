@@ -601,7 +601,6 @@ const ChatBox: React.FC = () => {
               <div className="w-9 h-9 rounded-xl flex items-center justify-center text-xl" style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>✈️</div>
               <div>
                 <h1 className="text-white font-bold text-sm leading-tight">AI Travel Guide</h1>
-                <p className="text-indigo-400 text-xs mt-0.5">301개 여행지 · RAG 기반</p>
               </div>
             </div>
           </div>
@@ -818,7 +817,6 @@ const ChatBox: React.FC = () => {
               </svg>
             </button>
           </div>
-          <p className="text-center text-gray-600 text-xs mt-2">Enter 키로 전송 · 301개 여행지 데이터 기반</p>
         </div>
       </div>
     </div>
