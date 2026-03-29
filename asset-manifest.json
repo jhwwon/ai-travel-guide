@@ -1,17 +1,17 @@
 {
   "files": {
     "main.css": "/ai-travel-guide/static/css/main.76eaf9bc.css",
-    "main.js": "/ai-travel-guide/static/js/main.fc7690d0.js",
+    "main.js": "/ai-travel-guide/static/js/main.b276c51b.js",
     "static/js/977.01378288.chunk.js": "/ai-travel-guide/static/js/977.01378288.chunk.js",
     "static/js/732.fda73a07.chunk.js": "/ai-travel-guide/static/js/732.fda73a07.chunk.js",
     "index.html": "/ai-travel-guide/index.html",
     "main.76eaf9bc.css.map": "/ai-travel-guide/static/css/main.76eaf9bc.css.map",
-    "main.fc7690d0.js.map": "/ai-travel-guide/static/js/main.fc7690d0.js.map",
+    "main.b276c51b.js.map": "/ai-travel-guide/static/js/main.b276c51b.js.map",
     "977.01378288.chunk.js.map": "/ai-travel-guide/static/js/977.01378288.chunk.js.map",
     "732.fda73a07.chunk.js.map": "/ai-travel-guide/static/js/732.fda73a07.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.76eaf9bc.css",
-    "static/js/main.fc7690d0.js"
+    "static/js/main.b276c51b.js"
   ]
 }
