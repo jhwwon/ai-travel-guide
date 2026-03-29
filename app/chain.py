@@ -81,8 +81,9 @@ def get_chat_history(session_id: str):
     return chat_histories[session_id]
 
 def filter_non_korean(text: str) -> str:
-    """한국어·숫자·기본 ASCII(마크다운 기호 포함) 외 문자를 제거합니다."""
-    filtered = re.sub(r'[^\uAC00-\uD7A3\u1100-\u11FF\u3130-\u318F\x00-\x7F]', '', text)
+    """한국어·숫자·마크다운 기호 외 문자를 제거합니다."""
+    # 허용: 한글, 숫자(0-9), 마크다운/문장부호(- * # . ! ? , : ( ) [ ] \n \r \t 공백), 이모지 제외
+    filtered = re.sub(r'[^\uAC00-\uD7A3\u1100-\u11FF\u3130-\u318F0-9\s\-\*#\.!\?,:\(\)\[\]\n\r]', '', text)
     # 내용 없는 빈 bold 마크다운 제거 (예: ****, ** **)
     filtered = re.sub(r'\*\*\s*\*\*', '', filtered)
     return filtered
