@@ -1,4 +1,5 @@
 import os
+import re
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -71,6 +72,10 @@ def get_chat_history(session_id: str):
         chat_histories[session_id] = history[-MAX_HISTORY_MESSAGES:]
     return chat_histories[session_id]
 
+def filter_non_korean(text: str) -> str:
+    """일본어(히라가나·가타카나)·한자 등 비한국어 문자를 제거합니다."""
+    return re.sub(r'[\u3040-\u30FF\u4E00-\u9FFF\u3400-\u4DBF]', '', text)
+
 def get_travel_response(message: str, session_id: str) -> str:
     chat_history = get_chat_history(session_id)
 
@@ -88,6 +93,7 @@ def get_travel_response(message: str, session_id: str) -> str:
         "question": message
     })
 
+    response = filter_non_korean(response)
     chat_history.append(HumanMessage(content=message))
     chat_history.append(AIMessage(content=response))
 
@@ -115,5 +121,6 @@ def stream_travel_response(message: str, session_id: str):
         full_response += chunk
         yield chunk
 
+    full_response = filter_non_korean(full_response)
     chat_history.append(HumanMessage(content=message))
     chat_history.append(AIMessage(content=full_response))
